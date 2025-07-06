@@ -1,0 +1,24 @@
+{
+    "packages": {
+      ".": {
+        "release-type": "simple",
+        "include-component-in-tag": false,
+        "versioning": "default",
+        "bump-minor-pre-major": true,
+        "bump-patch-for-minor-pre-major": false,
+        "draft": false,
+        "prerelease": true,
+        "changelog-sections": [
+          { "type": "feat", "section": "Features", "hidden": false },
+          { "type": "fix", "section": "Bug Fixes", "hidden": false },
+          { "type": "chore", "section": "Miscellaneous", "hidden": false },
+          { "type": "refactor", "section": "Code Refactoring", "hidden": false },
+          { "type": "docs", "section": "Documentation", "hidden": false },
+          { "type": "perf", "section": "Performance Improvements", "hidden": false },
+          { "type": "test", "section": "Tests", "hidden": false }
+        ],
+        "changelog-path": "CHANGELOG.md",
+        "version-file": "TransmogCleaner.toc"
+      }
+    }
+  } 

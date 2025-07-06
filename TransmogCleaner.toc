@@ -1,0 +1,7 @@
+## Interface: 100207
+## Title: Nyly's Sell Low-Level Epics
+## IconTexture: Interface\Addons\TransmogCleaner\Media\Textures\logo.png
+## Notes: Sells epic items with required level < 79 when merchant window opens
+## Author: NylyFromTheMag
+## Version: 0.1.0
+TransmogCleaner.lua
