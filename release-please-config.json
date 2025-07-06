@@ -18,7 +18,13 @@
           { "type": "test", "section": "Tests", "hidden": false }
         ],
         "changelog-path": "CHANGELOG.md",
-        "version-file": "TransmogCleaner.toc"
+        "version-files": [
+          {
+              "path": "TransmogCleaner.toc",
+              "pattern": "## Version: (\\d+\\.\\d+\\.\\d+)",
+              "transform": "## Version: ${version}"          
+          }
+        ]
       }
     }
   } 
