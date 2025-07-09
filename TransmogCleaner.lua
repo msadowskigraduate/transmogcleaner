@@ -508,7 +508,7 @@ local function CreateSellButton()
     local btn = CreateFrame("Button", "SellLowLevelEpicsButton", MerchantFrame, "UIPanelButtonTemplate")
     btn:SetSize(160, 24)
     btn:SetText("Sell Low-Level Epics")
-    btn:SetPoint("BOTTOMLEFT", MerchantFrame, "BOTTOMLEFT", 10, 10)
+    btn:SetPoint("BOTTOMLEFT", MerchantFrame, "BOTTOMLEFT", 0, 10)
 
     btn:SetScript("OnClick", function()
         SellItems()
