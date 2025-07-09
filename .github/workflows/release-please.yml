@@ -23,7 +23,12 @@ jobs:
           token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
           release-type: simple
 
+      - name: Echo
+        run: |
+          echo "New release created: ${{ steps.release.outputs.tag_name }}"
+          echo "TOC: $(cat TransmogCleaner.toc | grep "^## Version:")"
+
       - name: Zip Addon Folder
         run: |
           mkdir build
-          zip -r build/TransmogCleaner-${{ steps.release.outputs.tag_name }}.zip TransmogCleaner
+          zip -r build/TransmogCleaner-${{ steps.release.outputs.tag_name }}.zip Media *.lua *.toc *.xml
