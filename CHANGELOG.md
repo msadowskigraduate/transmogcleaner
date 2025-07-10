@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.0](https://github.com/msadowskigraduate/transmogcleaner/compare/v0.1.0...v0.2.0) (2025-07-10)
+
+
+### Features
+
+* Added BoE  pass and fixed name skip pass ([f4cf15d](https://github.com/msadowskigraduate/transmogcleaner/commit/f4cf15d20ed46edde586b48ca41b78d6ed767027))
+
 ## [0.1.0](https://github.com/msadowskigraduate/transmogcleaner/compare/v0.0.1...v0.1.0) (2025-07-10)
 
 
