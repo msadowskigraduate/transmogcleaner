@@ -18,6 +18,7 @@ local defaultSettings = {
         TradeGoods = false,
         Misc = false,
     },
+    skipboes = true, -- Skip Bind on Equip items
     skipList = {},
     skipExpansions = {
         [254] = false, -- Classic
@@ -54,7 +55,7 @@ MergeDefaults(TransmogCleanerSettings, defaultSettings)
 -- Draggable Filter Frame with Filter Controls
 ------------------------------------------------------------
 local filterFrame = CreateFrame("Frame", "SellFilterFrame", UIParent, "BasicFrameTemplateWithInset")
-filterFrame:SetSize(450, 550)
+filterFrame:SetSize(460, 550)
 filterFrame:SetPoint("CENTER")
 filterFrame:SetMovable(true)
 filterFrame:EnableMouse(true)
@@ -163,7 +164,7 @@ end
 -- Name Filter
 local nameLabel = filterFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
 nameLabel:SetPoint("TOPLEFT", 220, -40)
-nameLabel:SetText("Name Contains:")
+nameLabel:SetText("Skip Name Contains:")
 
 local nameInput = CreateFrame("EditBox", nil, filterFrame, "InputBoxTemplate")
 nameInput:SetSize(100, 20)
@@ -172,6 +173,9 @@ nameInput:SetAutoFocus(false)
 nameInput:SetScript("OnEnterPressed", function(self)
     TransmogCleanerSettings.nameFilter = self:GetText()
     self:ClearFocus()
+end)
+nameInput:SetScript("OnEditFocusLost", function(self)
+    TransmogCleanerSettings.nameFilter = self:GetText()
 end)
 
 -- Item Type Filters
@@ -291,9 +295,20 @@ local function RenderSkipListIcons(parent)
         icon:Show()
     end
 end
+
+
+-- BOEs Skip Checkbox
+local skipBOEsCheck = CreateFrame("CheckButton", nil, filterFrame, "ChatConfigCheckButtonTemplate")
+skipBOEsCheck:SetPoint("TOPLEFT", previousLabel, "BOTTOMLEFT", 0, -20)
+skipBOEsCheck.Text:SetText("Skip Bind on Equip Items")
+skipBOEsCheck:SetScript("OnClick", function(self)
+    print("Skip BOEs:", self:GetChecked())
+    TransmogCleanerSettings.skipboes = self:GetChecked()
+end)
+
 -- Skip List Item Icon Grid
 local skipGridHeader = filterFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-skipGridHeader:SetPoint("TOPLEFT", previousLabel, "BOTTOMLEFT", 0, -20)
+skipGridHeader:SetPoint("TOPLEFT", skipBOEsCheck, "BOTTOMLEFT", 0, -20)
 skipGridHeader:SetText("Skipped Items:")
 filterFrame.skipGridHeader = skipGridHeader
 
@@ -383,7 +398,8 @@ local validEquipLocs = {
     INVTYPE_RANGEDRIGHT = true,
     INVTYPE_THROWN = true,
     INVTYPE_RELIC = true,
-    INVTYPE_TABARD = true
+    INVTYPE_TABARD = true,
+    INVTYPE_ROBE = true
 }
 
 ------------------------------------------------------------
@@ -410,11 +426,14 @@ local function IsItemSellable(itemLink)
     local namePass          = true
     local skipListPass      = TransmogCleanerSettings.skipList[itemID] ~= true
     local expansionPass     = not TransmogCleanerSettings.skipExpansions[expansionID]
+    
+    -- Check if item is Bind on Equip
+    local boePass = bindType ~= 2 or not TransmogCleanerSettings.skipboes
 
     -- Name filter (if defined)
-    local nameFilter = TransmogCleanerSettings.nameFilter and TransmogCleanerSettings.nameFilter:lower() or ""
-    if nameFilter ~= "" then
-        namePass = itemName and itemName:lower():find(nameFilter, 1, true)
+    local nameFilter = TransmogCleanerSettings.nameFilter and TransmogCleanerSettings.nameFilter:lower()
+    if nameFilter ~= "" and itemName then
+        namePass = itemName:lower():find(nameFilter, 1, true) == nil
     end
 
     -- Item type filters
@@ -428,13 +447,14 @@ local function IsItemSellable(itemLink)
     elseif itemType == "Miscellaneous" and TransmogCleanerSettings.itemTypes.Misc then
         typePass = true
     end
-    --if not qualityPass then print(itemLink, "Failed quality") end
-    --if not levelPass then print(itemLink, "Failed level") end
-    --if not requiredLevelPass then print(itemLink, "Failed required level") end
-    --if not namePass then print(itemLink, "Failed name filter") end
-    --if not skipListPass then print(itemLink, "In skip list") end
-    --if not expansionPass then print(itemLink, "Skipped due to expansion") end
-    --if not typePass then print(itemLink, "Failed type filter", itemEquipLoc) end
+    if not qualityPass then print(itemLink, "Failed quality") end
+    if not levelPass then print(itemLink, "Failed level") end
+    if not requiredLevelPass then print(itemLink, "Failed required level") end
+    if not namePass then print(itemLink, "Failed name filter") end
+    if not skipListPass then print(itemLink, "In skip list") end
+    if not expansionPass then print(itemLink, "Skipped due to expansion") end
+    if not typePass then print(itemLink, "Failed type filter", itemEquipLoc) end
+    if not boePass then print(itemLink, "Failed Bind on Equip filter") end
 
     -- Final AND evaluation
     return qualityPass
@@ -444,6 +464,7 @@ local function IsItemSellable(itemLink)
         and skipListPass
         and expansionPass
         and typePass
+        and boePass
 end
 
 
@@ -508,7 +529,7 @@ local function CreateSellButton()
     local btn = CreateFrame("Button", "SellLowLevelEpicsButton", MerchantFrame, "UIPanelButtonTemplate")
     btn:SetSize(160, 24)
     btn:SetText("Sell Low-Level Epics")
-    btn:SetPoint("BOTTOMLEFT", MerchantFrame, "BOTTOMLEFT", 0, 10)
+    btn:SetPoint("BOTTOMLEFT", MerchantFrame, "BOTTOMLEFT", 1, 2)
 
     btn:SetScript("OnClick", function()
         SellItems()

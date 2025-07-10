@@ -5,5 +5,5 @@
 ## Notes: Sells epic items with required level < 79 when merchant window opens
 ## Category: Transmog
 ## Author: NylyFromTheMag
-## SavedVariables: TransmogCleanerSettings
+## SavedVariablesPerCharacter: TransmogCleanerSettings
 TransmogCleaner.lua

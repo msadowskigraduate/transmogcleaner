@@ -24,17 +24,20 @@ jobs:
           release-type: simple
 
       - name: Echo
+        if: ${{ steps.release.outputs.tag_name != '' }}  
         run: |
           echo "New release created: ${{ steps.release.outputs.tag_name }}"
           echo "TOC: $(cat TransmogCleaner.toc | grep "^## Version:")"
 
       - name: Zip Addon Folder
+        if: ${{ steps.release.outputs.tag_name != '' }}  
         run: |
           mkdir build
           zip -r build/TransmogCleaner-${{ steps.release.outputs.tag_name }}.zip Media *.lua *.toc *.xml
           
       - name: Upload Release Asset to CurseForge
         uses: itsmeow/curseforge-upload@v3
+        if: ${{ steps.release.outputs.tag_name != '' }}  
         with:
           file_path: build/TransmogCleaner-${{ steps.release.outputs.tag_name }}.zip
           project_id: "1299627"
