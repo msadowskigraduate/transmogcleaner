@@ -23,6 +23,13 @@ jobs:
           token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
           release-type: simple
 
+      - name: Update .toc Version
+        if: ${{ steps.release.outputs.tag_name != '' }}
+        run: |
+          VERSION=${{ steps.release.outputs.tag_name }}
+          VERSION=${VERSION#v}
+          sed -i "s/^## Version: .*/## Version: $VERSION/" TransmogCleaner.toc
+
       - name: Echo
         if: ${{ steps.release.outputs.tag_name != '' }}  
         run: |
