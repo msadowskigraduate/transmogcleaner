@@ -43,5 +43,7 @@ jobs:
           project_id: "1299627"
           token: ${{ secrets.CURSEFORGE_TOKEN }}
           game_endpoint: wow
-          game_versions: "13433"
+          game_versions: "13203,13433"
+          changelog: ${{ steps.release.outputs.release_notes }}
+          changelog_type: markdown
 

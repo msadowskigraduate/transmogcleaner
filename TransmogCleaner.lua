@@ -277,7 +277,8 @@ local function RenderSkipListIcons(parent)
         local col = (i - 1) % cols
         icon:SetPoint("TOPLEFT", parent.skipGridHeader, "BOTTOMLEFT", col * (size + padding), -row * (size + padding))
 
-        local _, _, _, _, _, _, _, _, _, tex = GetItemInfoInstant(itemID)
+        local id, type, subtype, loc, tex, clsid, sclsid = GetItemInfoInstant(itemID)
+        print(tex, itemID)
         icon.icon:SetTexture(tex or "Interface\\Icons\\INV_Misc_QuestionMark")
 
         icon:SetScript("OnEnter", function()
@@ -309,8 +310,12 @@ end)
 -- Skip List Item Icon Grid
 local skipGridHeader = filterFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
 skipGridHeader:SetPoint("TOPLEFT", skipBOEsCheck, "BOTTOMLEFT", 0, -20)
-skipGridHeader:SetText("Skipped Items:")
+skipGridHeader:SetText("Skipped Items: ")
 filterFrame.skipGridHeader = skipGridHeader
+
+local tooltip = filterFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+tooltip:SetPoint("BOTTOMLEFT", filterFrame, "BOTTOMLEFT", 20, 80)
+tooltip:SetText("Drag items here to skip them.")
 
 -- Drag-and-drop to skip list
 filterFrame:SetScript("OnReceiveDrag", function(self)
