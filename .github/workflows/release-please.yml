@@ -32,3 +32,13 @@ jobs:
         run: |
           mkdir build
           zip -r build/TransmogCleaner-${{ steps.release.outputs.tag_name }}.zip Media *.lua *.toc *.xml
+          
+      - name: Upload Release Asset to CurseForge
+        uses: itsmeow/curseforge-upload@v3
+        with:
+          file_path: build/TransmogCleaner-${{ steps.release.outputs.tag_name }}.zip
+          project_id: "1299627"
+          token: ${{ secrets.CURSEFORGE_TOKEN }}
+          game_endpoint: wow
+          game_versions: "13433"
+
