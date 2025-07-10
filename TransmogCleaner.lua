@@ -278,7 +278,7 @@ local function RenderSkipListIcons(parent)
         icon:SetPoint("TOPLEFT", parent.skipGridHeader, "BOTTOMLEFT", col * (size + padding), -row * (size + padding))
 
         local id, type, subtype, loc, tex, clsid, sclsid = GetItemInfoInstant(itemID)
-        print(tex, itemID)
+        --print(tex, itemID)
         icon.icon:SetTexture(tex or "Interface\\Icons\\INV_Misc_QuestionMark")
 
         icon:SetScript("OnEnter", function()
@@ -452,14 +452,14 @@ local function IsItemSellable(itemLink)
     elseif itemType == "Miscellaneous" and TransmogCleanerSettings.itemTypes.Misc then
         typePass = true
     end
-    if not qualityPass then print(itemLink, "Failed quality") end
-    if not levelPass then print(itemLink, "Failed level") end
-    if not requiredLevelPass then print(itemLink, "Failed required level") end
-    if not namePass then print(itemLink, "Failed name filter") end
-    if not skipListPass then print(itemLink, "In skip list") end
-    if not expansionPass then print(itemLink, "Skipped due to expansion") end
-    if not typePass then print(itemLink, "Failed type filter", itemEquipLoc) end
-    if not boePass then print(itemLink, "Failed Bind on Equip filter") end
+   -- if not qualityPass then print(itemLink, "Failed quality") end
+   -- if not levelPass then print(itemLink, "Failed level") end
+   -- if not requiredLevelPass then print(itemLink, "Failed required level") end
+   -- if not namePass then print(itemLink, "Failed name filter") end
+   -- if not skipListPass then print(itemLink, "In skip list") end
+   -- if not expansionPass then print(itemLink, "Skipped due to expansion") end
+   -- if not typePass then print(itemLink, "Failed type filter", itemEquipLoc) end
+   -- if not boePass then print(itemLink, "Failed Bind on Equip filter") end
 
     -- Final AND evaluation
     return qualityPass
