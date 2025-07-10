@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.2.1](https://github.com/msadowskigraduate/transmogcleaner/compare/v0.2.0...v0.2.1) (2025-07-10)
+
+
+### Bug Fixes
+
+* added tooltip information for drag and drop ([a0bf4ba](https://github.com/msadowskigraduate/transmogcleaner/commit/a0bf4baf1a37d023edad0ecae208d364ada9c67f))
+* version bump from CI to .toc file ([8638b14](https://github.com/msadowskigraduate/transmogcleaner/commit/8638b14651136b56ed60407d3e4aa747d2a70c77))
+
 ## [0.2.0](https://github.com/msadowskigraduate/transmogcleaner/compare/v0.1.0...v0.2.0) (2025-07-10)
 
 
