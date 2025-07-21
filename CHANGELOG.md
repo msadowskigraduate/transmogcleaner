@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0](https://github.com/msadowskigraduate/transmogcleaner/compare/v0.2.1...v0.3.0) (2025-07-21)
+
+
+### Features
+
+* Added new filter options ([9579faa](https://github.com/msadowskigraduate/transmogcleaner/commit/9579faa77b567ca6f47ae635cb454fa3b80c76b9))
+
 ## [0.2.1](https://github.com/msadowskigraduate/transmogcleaner/compare/v0.2.0...v0.2.1) (2025-07-10)
 
 
