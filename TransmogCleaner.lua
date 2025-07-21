@@ -15,8 +15,16 @@ local defaultSettings = {
     itemTypes = {
         Equip = true,
         Consumable = false,
+        Container = false,
+        Gem = false,
+        Reagent = false,
+        Projectile = false,
         TradeGoods = false,
+        Generic = false,
+        Recipe = false,
         Misc = false,
+        Glyph = false,
+        ItemEnhancement = false,
     },
     skipboes = true, -- Skip Bind on Equip items
     skipList = {},
@@ -55,7 +63,7 @@ MergeDefaults(TransmogCleanerSettings, defaultSettings)
 -- Draggable Filter Frame with Filter Controls
 ------------------------------------------------------------
 local filterFrame = CreateFrame("Frame", "SellFilterFrame", UIParent, "BasicFrameTemplateWithInset")
-filterFrame:SetSize(460, 550)
+filterFrame:SetSize(640, 550)
 filterFrame:SetPoint("CENTER")
 filterFrame:SetMovable(true)
 filterFrame:EnableMouse(true)
@@ -184,11 +192,20 @@ typeLabel:SetPoint("TOPLEFT", nameLabel, "BOTTOMLEFT", 0, -20)
 typeLabel:SetText("Item Types:")
 
 local itemTypes = {
-    { key = "Equip", label = "Equippable" },
     { key = "Consumable", label = "Consumables" },
+    { key = "Container", label = "Containers" },
+    { key = "Gem", label = "Gems" },
+    { key = "Glyph", label = "Glyphs" },
+    { key = "ItemEnhancement", label = "Item Enhancements" },
+    { key = "Miscellaneous", label = "Miscellaneous" },
+    { key = "Projectile", label = "Projectiles" },
+    { key = "Quiver", label = "Quivers" },
+    { key = "Reagent", label = "Reagents" },
+    { key = "Recipe", label = "Recipes" },
     { key = "TradeGoods", label = "Trade Goods" },
-    { key = "Misc", label = "Misc" },
+    { key = "BattlePet", label = "Battle Pets" },
 }
+
 
 local previous
 for i, typeInfo in ipairs(itemTypes) do
@@ -210,8 +227,8 @@ end
 
 -- Skip Expansions
 local skipExpansionsLabel = filterFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-skipExpansionsLabel:SetPoint("TOPLEFT", previous, "BOTTOMLEFT", 0, -20)
-skipExpansionsLabel:SetText("Skip Expansions:") 
+skipExpansionsLabel:SetPoint("TOPLEFT", nameLabel, "BOTTOMLEFT", 260, 0)
+skipExpansionsLabel:SetText("Skip Expansions:")
 local skipExpansions = {
     { id = 254, label = "Classic" },
     { id = 1, label = "The Burning Crusade" },
@@ -445,20 +462,42 @@ local function IsItemSellable(itemLink)
     local typePass = false
     if validEquipLocs[itemEquipLoc] and TransmogCleanerSettings.itemTypes.Equip then
         typePass = true
-    elseif itemType == "Consumable" and TransmogCleanerSettings.itemTypes.Consumable then
-        typePass = true
-    elseif itemType == "Trade Goods" and TransmogCleanerSettings.itemTypes.TradeGoods then
-        typePass = true
-    elseif itemType == "Miscellaneous" and TransmogCleanerSettings.itemTypes.Misc then
+    else
+    -- Table of itemType keys mapped to settings keys
+    local itemTypeMap = {
+        ["Consumable"]      = "Consumable",
+        ["Container"]       = "Container",
+        ["Weapon"]          = "Weapon",
+        ["Gem"]             = "Gem",
+        ["Armor"]           = "Armor",
+        ["Reagent"]         = "Reagent",
+        ["Projectile"]      = "Projectile",
+        ["Trade Goods"]     = "TradeGoods",
+        ["Generic"]         = "Generic",
+        ["Recipe"]          = "Recipe",
+        ["Quiver"]          = "Quiver",
+        ["Quest"]           = "Quest",
+        ["Key"]             = "Key",
+        ["Permanent"]       = "Permanent",
+        ["Miscellaneous"]   = "Misc",
+        ["Glyph"]           = "Glyph",
+        ["Battle Pet"]      = "BattlePet",
+        ["WoW Token"]       = "WoWToken",
+        ["Item Enhancement"] = "ItemEnhancement",
+    }
+
+    local settingsKey = itemTypeMap[itemType]
+    if settingsKey and TransmogCleanerSettings.itemTypes[settingsKey] then
         typePass = true
     end
+end
    -- if not qualityPass then print(itemLink, "Failed quality") end
    -- if not levelPass then print(itemLink, "Failed level") end
    -- if not requiredLevelPass then print(itemLink, "Failed required level") end
    -- if not namePass then print(itemLink, "Failed name filter") end
    -- if not skipListPass then print(itemLink, "In skip list") end
    -- if not expansionPass then print(itemLink, "Skipped due to expansion") end
-   -- if not typePass then print(itemLink, "Failed type filter", itemEquipLoc) end
+   if not typePass then print(itemLink, "Failed type filter", itemEquipLoc) end
    -- if not boePass then print(itemLink, "Failed Bind on Equip filter") end
 
     -- Final AND evaluation
