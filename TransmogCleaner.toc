@@ -1,4 +1,4 @@
-## Version: 0.1.0
+## Version: 0.3.0
 ## Interface: 100207
 ## Title: Nyly's Sell Low-Level Epics
 ## IconTexture: Interface\Addons\TransmogCleaner\Media\Textures\logo.png
