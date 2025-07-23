@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.0](https://github.com/msadowskigraduate/transmogcleaner/compare/v0.3.0...v0.4.0) (2025-07-23)
+
+
+### Features
+
+* Autosell and fixed the issue of not selling all items ([a14f9c0](https://github.com/msadowskigraduate/transmogcleaner/commit/a14f9c0d044ef133351defb4d8e6114e0239de04))
+
 ## [0.3.0](https://github.com/msadowskigraduate/transmogcleaner/compare/v0.2.1...v0.3.0) (2025-07-21)
 
 
