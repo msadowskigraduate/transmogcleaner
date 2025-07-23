@@ -1,5 +1,6 @@
 -- SavedVariables
 local defaultSettings = {
+    autosale = false,
     minItemLevel = 0,
     maxItemLevel = 380,
     maxReqLevel = 79,
@@ -77,9 +78,24 @@ filterFrame.title:SetFontObject("GameFontHighlight")
 filterFrame.title:SetPoint("CENTER", filterFrame.TitleBg, "CENTER")
 filterFrame.title:SetText("Nyly's Sell Low-Level Epics")
 
+local autosaleCheck = CreateFrame("CheckButton", nil, filterFrame, "ChatConfigCheckButtonTemplate")
+autosaleCheck:SetPoint("TOPLEFT", 12, -30) 
+autosaleCheck.Text:SetText("Enable Auto-Sell")
+autosaleCheck:SetScript("OnClick", function(self)
+    TransmogCleanerSettings.autosale = self:GetChecked()
+    if self:GetChecked() then
+        print("|cff00ff00[SellLowLevelEpics]|r Auto-sell enabled.")
+    else
+        print("|cff00ff00[SellLowLevelEpics]|r Auto-sell disabled.")
+    end
+end)
+autosaleCheck:SetScript("OnShow", function(self)
+    self:SetChecked(TransmogCleanerSettings.autosale)
+end)
+
 -- Min Item Level
 local minLevelLabel = filterFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-minLevelLabel:SetPoint("TOPLEFT", 12, -40)
+minLevelLabel:SetPoint("TOPLEFT", autosaleCheck, 0, -40)
 minLevelLabel:SetText("Min Item Level:")
 
 local minLevelInput = CreateFrame("EditBox", nil, filterFrame, "InputBoxTemplate")
@@ -192,6 +208,7 @@ typeLabel:SetPoint("TOPLEFT", nameLabel, "BOTTOMLEFT", 0, -20)
 typeLabel:SetText("Item Types:")
 
 local itemTypes = {
+    { key = "Equip", label = "Equipment" },
     { key = "Consumable", label = "Consumables" },
     { key = "Container", label = "Containers" },
     { key = "Gem", label = "Gems" },
@@ -199,7 +216,6 @@ local itemTypes = {
     { key = "ItemEnhancement", label = "Item Enhancements" },
     { key = "Miscellaneous", label = "Miscellaneous" },
     { key = "Projectile", label = "Projectiles" },
-    { key = "Quiver", label = "Quivers" },
     { key = "Reagent", label = "Reagents" },
     { key = "Recipe", label = "Recipes" },
     { key = "TradeGoods", label = "Trade Goods" },
@@ -227,7 +243,7 @@ end
 
 -- Skip Expansions
 local skipExpansionsLabel = filterFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-skipExpansionsLabel:SetPoint("TOPLEFT", nameLabel, "BOTTOMLEFT", 260, 0)
+skipExpansionsLabel:SetPoint("TOPLEFT", nameLabel, "BOTTOMLEFT", 220, -20)
 skipExpansionsLabel:SetText("Skip Expansions:")
 local skipExpansions = {
     { id = 254, label = "Classic" },
@@ -467,22 +483,17 @@ local function IsItemSellable(itemLink)
     local itemTypeMap = {
         ["Consumable"]      = "Consumable",
         ["Container"]       = "Container",
-        ["Weapon"]          = "Weapon",
         ["Gem"]             = "Gem",
-        ["Armor"]           = "Armor",
         ["Reagent"]         = "Reagent",
         ["Projectile"]      = "Projectile",
         ["Trade Goods"]     = "TradeGoods",
         ["Generic"]         = "Generic",
         ["Recipe"]          = "Recipe",
-        ["Quiver"]          = "Quiver",
-        ["Quest"]           = "Quest",
         ["Key"]             = "Key",
         ["Permanent"]       = "Permanent",
         ["Miscellaneous"]   = "Misc",
         ["Glyph"]           = "Glyph",
         ["Battle Pet"]      = "BattlePet",
-        ["WoW Token"]       = "WoWToken",
         ["Item Enhancement"] = "ItemEnhancement",
     }
 
@@ -497,9 +508,8 @@ end
    -- if not namePass then print(itemLink, "Failed name filter") end
    -- if not skipListPass then print(itemLink, "In skip list") end
    -- if not expansionPass then print(itemLink, "Skipped due to expansion") end
-   if not typePass then print(itemLink, "Failed type filter", itemEquipLoc) end
+   -- if not typePass then print(itemLink, "Failed type filter", itemEquipLoc) end
    -- if not boePass then print(itemLink, "Failed Bind on Equip filter") end
-
     -- Final AND evaluation
     return qualityPass
         and levelPass
@@ -509,6 +519,7 @@ end
         and expansionPass
         and typePass
         and boePass
+        and sellPrice > 1
 end
 
 
@@ -517,45 +528,74 @@ local BATCH_SIZE = 5
 local DELAY = 0.2
 
 local function SellBatch()
-    local itemsToSell = {}
+    if selling then return end
+    selling = true
 
-    -- Build item list once (prevents infinite loop)
-    for bag = 0, NUM_BAG_SLOTS do
-        for slot = 1, C_Container.GetContainerNumSlots(bag) do
-            local itemLink = C_Container.GetContainerItemLink(bag, slot)
-            if itemLink and IsItemSellable(itemLink) then
-                table.insert(itemsToSell, {bag = bag, slot = slot, link = itemLink})
+    local maxAttempts = 10
+    local currentAttempt = 0
+
+    local function GetSellableItems()
+        local items = {}
+        for bag = 0, NUM_BAG_SLOTS do
+            for slot = 1, C_Container.GetContainerNumSlots(bag) do
+                local itemLink = C_Container.GetContainerItemLink(bag, slot)
+                if itemLink and IsItemSellable(itemLink) then
+                    table.insert(items, { bag = bag, slot = slot, link = itemLink })
+                end
             end
         end
+        return items
     end
 
-    local index = 1
-    local function SellNextBatch()
-        local sold = 0
-        while sold < BATCH_SIZE and index <= #itemsToSell do
-            local entry = itemsToSell[index]
-            if C_Container.GetContainerItemLink(entry.bag, entry.slot) == entry.link then
-                C_Container.UseContainerItem(entry.bag, entry.slot)
-                print("Sold: " .. entry.link)
-                sold = sold + 1
-            end
-            index = index + 1
+    local function ProcessNextBatch()
+        currentAttempt = currentAttempt + 1
+        if currentAttempt > maxAttempts then
+            selling = false
+            print("|cffff0000[SellLowLevelEpics]|r Aborted: too many attempts (possible item reuse or failure).")
+            return
         end
 
-        if index <= #itemsToSell then
-            C_Timer.After(DELAY, SellNextBatch)
-        else
+        local itemsToSell = GetSellableItems()
+        if #itemsToSell == 0 then
             selling = false
             print("|cff00ff00[SellLowLevelEpics]|r Done selling.")
+            return
         end
+
+        local index = 1
+        local soldSomething = false
+
+        local function SellNext()
+            local sold = 0
+            while sold < BATCH_SIZE and index <= #itemsToSell do
+                local entry = itemsToSell[index]
+                local itemInfo = C_Container.GetContainerItemInfo(entry.bag, entry.slot)
+                if itemInfo and itemInfo.hyperlink == entry.link then
+                    C_Container.UseContainerItem(entry.bag, entry.slot)
+                    print("Sold: " .. entry.link)
+                    sold = sold + 1
+                    soldSomething = true
+                end
+                index = index + 1
+            end
+
+            if index <= #itemsToSell then
+                C_Timer.After(DELAY, SellNext)
+            else
+                -- If we didn’t sell anything, break to prevent infinite loop
+                if soldSomething then
+                    C_Timer.After(DELAY, ProcessNextBatch)
+                else
+                    selling = false
+                    print("|cffff0000[SellLowLevelEpics]|r Stopped: No items sold in last batch.")
+                end
+            end
+        end
+
+        SellNext()
     end
 
-    if #itemsToSell > 0 then
-        selling = true
-        SellNextBatch()
-    else
-        print("|cff00ff00[SellLowLevelEpics]|r No matching items to sell.")
-    end
+    ProcessNextBatch()
 end
 
 function SellItems()
@@ -592,6 +632,13 @@ f:RegisterEvent("MERCHANT_CLOSED")
 f:SetScript("OnEvent", function(_, event)
     if event == "MERCHANT_SHOW" then
         CreateSellButton()
+        
+        if TransmogCleanerSettings.autosale then
+            print("|cff00ff00[SellLowLevelEpics]|r Auto-selling.")
+            SellItems()
+        else
+            print("|cff00ff00[SellLowLevelEpics]|r Auto-sell is disabled.")
+        end
         filterFrame:Show()
     elseif event == "MERCHANT_CLOSED" then
         filterFrame:Hide()
