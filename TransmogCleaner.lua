@@ -1,5 +1,6 @@
 -- SavedVariables
 local defaultSettings = {
+    debug = true,
     autosale = false,
     minItemLevel = 0,
     maxItemLevel = 380,
@@ -20,12 +21,13 @@ local defaultSettings = {
         Gem = false,
         Reagent = false,
         Projectile = false,
-        TradeGoods = false,
         Generic = false,
         Recipe = false,
         Misc = false,
         Glyph = false,
         ItemEnhancement = false,
+        Miscellaneous = false,
+        Tradeskill = false
     },
     skipboes = true, -- Skip Bind on Equip items
     skipList = {},
@@ -78,8 +80,23 @@ filterFrame.title:SetFontObject("GameFontHighlight")
 filterFrame.title:SetPoint("CENTER", filterFrame.TitleBg, "CENTER")
 filterFrame.title:SetText("Nyly's Sell Low-Level Epics")
 
+local debugLabel = CreateFrame("CheckButton", nil, filterFrame, "ChatConfigCheckButtonTemplate")
+debugLabel:SetPoint("TOPLEFT", 12, -30) 
+debugLabel.Text:SetText("Enable Debug")
+debugLabel:SetScript("OnClick", function(self)
+    TransmogCleanerSettings.debug = self:GetChecked()
+    if self:GetChecked() then
+        print("|cff00ff00[SellLowLevelEpics]|r Debug enabled.")
+    else
+        print("|cff00ff00[SellLowLevelEpics]|r Debug disabled.")
+    end
+end)
+debugLabel:SetScript("OnShow", function(self)
+    self:SetChecked(TransmogCleanerSettings.debug)
+end)
+
 local autosaleCheck = CreateFrame("CheckButton", nil, filterFrame, "ChatConfigCheckButtonTemplate")
-autosaleCheck:SetPoint("TOPLEFT", 12, -30) 
+autosaleCheck:SetPoint("TOPLEFT", debugLabel, 0, -30) 
 autosaleCheck.Text:SetText("Enable Auto-Sell")
 autosaleCheck:SetScript("OnClick", function(self)
     TransmogCleanerSettings.autosale = self:GetChecked()
@@ -218,7 +235,7 @@ local itemTypes = {
     { key = "Projectile", label = "Projectiles" },
     { key = "Reagent", label = "Reagents" },
     { key = "Recipe", label = "Recipes" },
-    { key = "TradeGoods", label = "Trade Goods" },
+    { key = "Tradeskill", label = "Tradeskill" },
     { key = "BattlePet", label = "Battle Pets" },
 }
 
@@ -486,12 +503,12 @@ local function IsItemSellable(itemLink)
         ["Gem"]             = "Gem",
         ["Reagent"]         = "Reagent",
         ["Projectile"]      = "Projectile",
-        ["Trade Goods"]     = "TradeGoods",
+        ["Tradeskill"]     = "Tradeskill",
         ["Generic"]         = "Generic",
         ["Recipe"]          = "Recipe",
         ["Key"]             = "Key",
         ["Permanent"]       = "Permanent",
-        ["Miscellaneous"]   = "Misc",
+        ["Miscellaneous"]   = "Miscellaneous",
         ["Glyph"]           = "Glyph",
         ["Battle Pet"]      = "BattlePet",
         ["Item Enhancement"] = "ItemEnhancement",
@@ -500,16 +517,22 @@ local function IsItemSellable(itemLink)
     local settingsKey = itemTypeMap[itemType]
     if settingsKey and TransmogCleanerSettings.itemTypes[settingsKey] then
         typePass = true
+    else
+        if TransmogCleanerSettings.debug then print(itemLink,"Failed type filter",itemType, TransmogCleanerSettings.itemTypes[settingsKey] and settingsKey) end
     end
 end
-   -- if not qualityPass then print(itemLink, "Failed quality") end
-   -- if not levelPass then print(itemLink, "Failed level") end
-   -- if not requiredLevelPass then print(itemLink, "Failed required level") end
-   -- if not namePass then print(itemLink, "Failed name filter") end
-   -- if not skipListPass then print(itemLink, "In skip list") end
-   -- if not expansionPass then print(itemLink, "Skipped due to expansion") end
-   -- if not typePass then print(itemLink, "Failed type filter", itemEquipLoc) end
-   -- if not boePass then print(itemLink, "Failed Bind on Equip filter") end
+
+    if TransmogCleanerSettings.debug then
+        if not qualityPass then print(itemLink, "Failed quality") end
+        if not levelPass then print(itemLink, "Failed level") end
+        if not requiredLevelPass then print(itemLink, "Failed required level") end
+        if not namePass then print(itemLink, "Failed name filter") end
+        if not skipListPass then print(itemLink, "In skip list") end
+        if not expansionPass then print(itemLink, "Skipped due to expansion", expansionID) end
+        if not boePass then print(itemLink, "Failed Bind on Equip filter") end
+        print(itemLink, "Sell Price:", sellPrice)
+    end
+
     -- Final AND evaluation
     return qualityPass
         and levelPass
@@ -519,7 +542,7 @@ end
         and expansionPass
         and typePass
         and boePass
-        and sellPrice > 1
+        and sellPrice >= 1
 end
 
 
