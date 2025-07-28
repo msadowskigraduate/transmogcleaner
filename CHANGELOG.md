@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.1](https://github.com/msadowskigraduate/transmogcleaner/compare/v0.4.0...v0.4.1) (2025-07-28)
+
+
+### Bug Fixes
+
+* Tradeskill are now correctly sellable ([38754ac](https://github.com/msadowskigraduate/transmogcleaner/commit/38754acc96440d677e26664f2e8ac4ab8ffc47e2))
+
 ## [0.4.0](https://github.com/msadowskigraduate/transmogcleaner/compare/v0.3.0...v0.4.0) (2025-07-23)
 
 
